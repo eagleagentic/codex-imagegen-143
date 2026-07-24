@@ -16,6 +16,14 @@ Traditional Chinese: [README-zh.md](README-zh.md)
 
 ## Why We Made This Skill
 
+The main reason for this repository is a network error we encountered in the latest Codex image-generation path:
+
+```text
+image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+That error was observed with the latest version path, not with `@openai/codex@0.143.0`.
+
 Codex image-generation behavior can change across versions and runtime surfaces. For teams that need predictable output handling, prompt preservation, or compatibility with a known working image-generation flow, relying on the current session's default image tool can be too loose.
 
 This skill fixes that by delegating image work to a child Codex process pinned to `@openai/codex@0.143.0`.
@@ -128,13 +136,13 @@ The core rule is prompt preservation.
 
 ## Troubleshooting
 
-A common failure mode is a network request failure from the image generation backend:
+A common failure mode in the latest Codex image-generation path is a network request failure from the image generation backend:
 
 ```text
 image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
 ```
 
-This usually means the child Codex process could not reach the ChatGPT image-generation backend. Check network connectivity, VPN or proxy settings, firewall rules, and whether the authenticated Codex session can access `chatgpt.com`.
+This is the main reason this repository pins image generation to `@openai/codex@0.143.0`. If you still see this error, check network connectivity, VPN or proxy settings, firewall rules, and whether the authenticated Codex session can access `chatgpt.com`.
 
 ## Development Notes
 

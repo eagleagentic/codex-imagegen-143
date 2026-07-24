@@ -16,6 +16,14 @@ English: [README.md](README.md)
 
 ## 為什麼要做這個 Skill
 
+這個 repo 的主要原因，是我們在最新版 Codex 圖片生成路徑遇到以下網路錯誤：
+
+```text
+image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+這個錯誤是在最新版路徑遇到的，不是 `@openai/codex@0.143.0` 版本本身的錯誤。
+
 Codex 的圖片生成能力可能會因版本與執行介面不同而改變。對需要穩定輸出處理、prompt 保真、或相容既有圖片生成流程的團隊來說，直接依賴目前 session 的預設圖片工具不夠明確。
 
 這個 skill 的做法是：把圖片工作委派給一個子 Codex process，並固定使用 `@openai/codex@0.143.0`。
@@ -128,13 +136,13 @@ Execution instruction: Image 1 is /absolute/path/to/style-reference.jpg. Image 2
 
 ## 疑難排解
 
-常見失敗情況之一，是圖片生成後端的網路請求失敗：
+最新版 Codex 圖片生成路徑的常見失敗情況之一，是圖片生成後端的網路請求失敗：
 
 ```text
 image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
 ```
 
-這通常代表子 Codex process 無法連線到 ChatGPT 圖片生成後端。請檢查網路連線、VPN 或 proxy 設定、防火牆規則，以及目前已登入的 Codex session 是否能存取 `chatgpt.com`。
+這也是本 repo 固定使用 `@openai/codex@0.143.0` 來執行圖片生成的主要原因。如果仍然看到這個錯誤，請檢查網路連線、VPN 或 proxy 設定、防火牆規則，以及目前已登入的 Codex session 是否能存取 `chatgpt.com`。
 
 ## 開發備註
 
