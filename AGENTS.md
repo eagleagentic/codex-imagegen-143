@@ -15,9 +15,9 @@ Keep new skill-specific material under `skills/imagegen-0-143-0/`. Add reference
 There is no build step or package manager configuration in this repository. Use lightweight validation commands:
 
 ```bash
-rtk rg --files
-rtk sed -n '1,220p' skills/imagegen-0-143-0/SKILL.md
-rtk sed -n '1,220p' skills/imagegen-0-143-0/references/usage.md
+rg --files
+sed -n '1,220p' skills/imagegen-0-143-0/SKILL.md
+sed -n '1,220p' skills/imagegen-0-143-0/references/usage.md
 ```
 
 Use these to confirm file layout, review Markdown content, and catch accidental path changes. If you add tooling later, document the exact command here.
