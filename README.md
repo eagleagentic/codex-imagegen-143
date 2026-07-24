@@ -126,6 +126,16 @@ The core rule is prompt preservation.
 - Do not fix grammar or spelling unless requested.
 - Put image-file mapping and save-path instructions only in `Execution instruction:`.
 
+## Troubleshooting
+
+A common failure mode is a network request failure from the image generation backend:
+
+```text
+image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+This usually means the child Codex process could not reach the ChatGPT image-generation backend. Check network connectivity, VPN or proxy settings, firewall rules, and whether the authenticated Codex session can access `chatgpt.com`.
+
 ## Development Notes
 
 There is no build step in this repository. For documentation changes, review the Markdown files and confirm that command examples still use:

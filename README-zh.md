@@ -126,6 +126,16 @@ Execution instruction: Image 1 is /absolute/path/to/style-reference.jpg. Image 2
 - 除非使用者要求，不要修正文法或拼字。
 - 圖片檔案對應與存檔位置只放在 `Execution instruction:`。
 
+## 疑難排解
+
+常見失敗情況之一，是圖片生成後端的網路請求失敗：
+
+```text
+image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+這通常代表子 Codex process 無法連線到 ChatGPT 圖片生成後端。請檢查網路連線、VPN 或 proxy 設定、防火牆規則，以及目前已登入的 Codex session 是否能存取 `chatgpt.com`。
+
 ## 開發備註
 
 這個 repo 目前沒有 build step。修改文件後，請檢查 Markdown，並確認指令範例仍然使用：
