@@ -1,0 +1,4 @@
+interface:
+  display_name: "imagegen 0.143.0"
+  short_description: "Generate and edit images via Codex 0.143.0"
+  default_prompt: "Use $imagegen-0-143-0 to generate a polished marketing image and save the final file path."
