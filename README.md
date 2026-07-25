@@ -1,158 +1,127 @@
-# Codex Imagegen 0.143.0 Skill
+# imagegen-0-143-0
 
-A small Codex skill package for generating and editing bitmap images through a fixed Codex CLI version: `@openai/codex@0.143.0`.
+<p align="center">
+  <strong>Stable Codex imagegen, delegated from your agent.</strong>
+</p>
 
-This repository is intentionally narrow. It exists to make image generation behavior repeatable when a workflow needs the older `imagegen` path from Codex `0.143.0`, instead of whatever image tool is available in the current agent session.
+<p align="center">
+  <a href="README-zh.md">繁體中文</a> ·
+  <a href="skills/imagegen-0-143-0">Browse skill</a>
+</p>
 
-Traditional Chinese: [README-zh.md](README-zh.md)
+![Stable Codex imagegen, delegated from your agent](assets/hero.jpg)
 
-## What This Skill Does
+This skill pins image generation and editing to `@openai/codex@0.143.0`. Your coding agent loads `$imagegen-0-143-0`, then delegates the actual image work to that fixed Codex path so results stay repeatable across sessions.
 
-- Runs image generation through `@openai/codex@0.143.0`.
-- Supports new image generation, image editing, and reference-image-guided generation.
-- Preserves the user's image prompt exactly.
-- Passes local input images with absolute `-i` paths.
-- Separates operational instructions, such as save location, from the actual image prompt.
+Works with **Codex**, **Claude Code**, and **Grok**.
 
-## Why We Made This Skill
+## Install
 
-The main reason for this repository is a network error we encountered in the latest Codex image-generation path:
+Copy `skills/imagegen-0-143-0` into the skills directory your agent loads:
 
-```text
-image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
-```
-
-That error was observed with the latest version path, not with `@openai/codex@0.143.0`.
-
-Codex image-generation behavior can change across versions and runtime surfaces. For teams that need predictable output handling, prompt preservation, or compatibility with a known working image-generation flow, relying on the current session's default image tool can be too loose.
-
-This skill fixes that by delegating image work to a child Codex process pinned to `@openai/codex@0.143.0`.
-
-The main goals are:
-
-1. Keep prompts stable by passing the user's prompt verbatim.
-2. Keep image input handling explicit through absolute paths.
-3. Keep generated assets easy to find by requiring a clear output path.
-4. Keep the workflow portable across repos that use Codex skills.
-
-## Repository Layout
-
-```text
-.
-├── AGENTS.md
-├── README.md
-├── README-zh.md
-└── skills/
-    └── imagegen-0-143-0/
-        ├── SKILL.md
-        ├── agents/
-        │   └── openai.yaml
-        └── references/
-            └── usage.md
-```
-
-## Quick Guide
-
-1. Copy or keep this repository where your Codex skill loader can read it.
-2. Ask Codex to use `imagegen-0-143-0` when generating or editing images.
-3. Provide a clear image prompt.
-4. Provide local image paths when editing or using references.
-5. Check the final absolute output path returned by the child Codex process.
-
-Example user request:
-
-```text
-Use $imagegen-0-143-0 to generate a polished marketing image of Hong Kong Victoria Harbour at golden hour. Save it to ./generated.
-```
-
-## Manual Command
-
-The skill runs this pattern internally:
+| Agent | Personal (all projects) | Project-only |
+| --- | --- | --- |
+| Codex | `~/.codex/skills/` | project skills path used by your Codex loader |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Grok | `~/.grok/skills/` or `~/.agents/skills/` | `.grok/skills/` |
 
 ```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  '$imagegen <verbatim user prompt>
-
-Execution instruction: Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
+# From this repo root
+cp -R skills/imagegen-0-143-0 ~/.claude/skills/imagegen-0-143-0   # Claude Code
+cp -R skills/imagegen-0-143-0 ~/.grok/skills/imagegen-0-143-0     # Grok
+cp -R skills/imagegen-0-143-0 ~/.agents/skills/imagegen-0-143-0   # shared / multi-agent
+cp -R skills/imagegen-0-143-0 ~/.codex/skills/imagegen-0-143-0    # Codex
 ```
 
-## Example: Generate a New Image
+**Prerequisite:** an authenticated Codex / ChatGPT session so the pinned CLI can run imagegen.
 
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  '$imagegen Generate a premium product launch hero image for a modern AI automation platform. Use a clean, professional composition with a real workspace, subtle screen glow, and clear room for website headline text.
+## Use with coding agents
 
-Execution instruction: Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
+Type a normal chat request and name the skill. The agent loads `$imagegen-0-143-0` and runs the pinned workflow for you.
 
-## Example: Edit an Existing Image
-
-Use one `-i` argument per input image. Always use absolute paths.
-
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  -i /absolute/path/to/source.png \
-  '$imagegen Replace the background with a clean studio setting. Keep the product shape, label, proportions, and camera angle unchanged.
-
-Execution instruction: Image 1 is /absolute/path/to/source.png. Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
-
-## Example: Generate From References
-
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  -i /absolute/path/to/style-reference.jpg \
-  -i /absolute/path/to/layout-reference.png \
-  '$imagegen Generate a new website hero image with a similar mood and composition. Do not copy the reference images directly.
-
-Execution instruction: Image 1 is /absolute/path/to/style-reference.jpg. Image 2 is /absolute/path/to/layout-reference.png. Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
-
-## Prompt Rules
-
-The core rule is prompt preservation.
-
-- Do not rewrite the user's image prompt.
-- Do not translate the prompt unless the user asks.
-- Do not add style details or constraints the user did not provide.
-- Do not fix grammar or spelling unless requested.
-- Put image-file mapping and save-path instructions only in `Execution instruction:`.
-
-## Troubleshooting
-
-A common failure mode in the latest Codex image-generation path is a network request failure from the image generation backend:
+### Codex
 
 ```text
-image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+Use $imagegen-0-143-0 to generate a polished marketing image of Hong Kong
+Victoria Harbour at golden hour. Save it to ./generated.
 ```
 
-This is the main reason this repository pins image generation to `@openai/codex@0.143.0`. If you still see this error, check network connectivity, VPN or proxy settings, firewall rules, and whether the authenticated Codex session can access `chatgpt.com`.
+```text
+Use $imagegen-0-143-0 to edit /absolute/path/to/product.png: replace the
+background with a clean studio setting. Keep product shape and camera angle.
+Save to ./generated.
+```
 
-## Development Notes
+### Claude Code
 
-There is no build step in this repository. For documentation changes, review the Markdown files and confirm that command examples still use:
+Install under `~/.claude/skills/` or `.claude/skills/`, then:
 
-- `npx --yes --package=@openai/codex@0.143.0`
-- `codex exec --skip-git-repo-check`
-- repeated `-i /absolute/path` arguments for input images
-- a separate `Execution instruction:` line
+```text
+Use the imagegen-0-143-0 skill to generate a premium product launch hero image
+for a modern AI automation platform. Clean professional workspace, subtle screen
+glow, room for a website headline. Save to ./generated.
+```
 
-## License
+```text
+$imagegen-0-143-0 — edit ./assets/product.png, studio background, keep the
+product unchanged. Save to ./generated.
+```
 
-No license file is currently included. Add one before distributing or publishing this repository.
+### Grok
+
+Install under `~/.grok/skills/` or `~/.agents/skills/` (or project `.grok/skills/`). Invoke with `$imagegen-0-143-0` or pick the skill from `/skills`:
+
+```text
+Use $imagegen-0-143-0 to generate a website hero. Style reference:
+./refs/style.jpg. Layout reference: ./refs/layout.png. Same mood and composition,
+do not copy the references. Save to ./generated.
+```
+
+```text
+$imagegen-0-143-0 generate a photorealistic desk setup for a SaaS landing page,
+soft morning light. Save absolute path when done.
+```
+
+## Prompt patterns
+
+Same wording works across agents. Prefer absolute paths for local images.
+
+**Generate**
+```text
+Use $imagegen-0-143-0 to generate <your image prompt>. Save it to ./generated.
+```
+
+**Edit**
+```text
+Use $imagegen-0-143-0 to edit /absolute/path/to/source.png: <edit instructions>.
+Save to ./generated.
+```
+
+**Reference-guided**
+```text
+Use $imagegen-0-143-0 with /absolute/path/to/style.jpg and
+/absolute/path/to/layout.png as references. Generate <your image prompt>.
+Do not copy the references. Save to ./generated.
+```
+
+## Rules
+
+- Do not rewrite, translate, or “improve” the user’s image prompt unless asked
+- File mapping and save path belong in execution instructions, not the image prompt
+- Default save directory: `./generated` when the user does not specify one
+- Report the final absolute output path
+
+## Why pin to 0.143.0
+
+Latest Codex image paths can fail with:
+
+```text
+image generation failed: network error: error sending request for url
+(https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+This skill delegates image work to a child process pinned to `@openai/codex@0.143.0` so prompts stay verbatim, inputs use absolute `-i` paths, and the output path is always explicit.
+
+If you still see that network error, check connectivity, VPN/proxy, firewall, and that the authenticated Codex session can reach `chatgpt.com`.
+
+Internal CLI details (for skill authors): [skills/imagegen-0-143-0/references/usage.md](skills/imagegen-0-143-0/references/usage.md)

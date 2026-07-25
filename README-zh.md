@@ -1,158 +1,127 @@
-# Codex Imagegen 0.143.0 Skill
+# imagegen-0-143-0
 
-這是一個精簡的 Codex skill，用固定版本 `@openai/codex@0.143.0` 來產生或編輯點陣圖片。
+<p align="center">
+  <strong>Stable Codex imagegen, delegated from your agent.</strong>
+</p>
 
-這個 repo 的範圍刻意保持很小：當工作流程需要使用 Codex `0.143.0` 內的舊版 `imagegen` 路徑，而不是目前 agent session 內建的圖片工具時，就使用這個 skill。
+<p align="center">
+  <a href="README.md">English</a> ·
+  <a href="skills/imagegen-0-143-0">Browse skill</a>
+</p>
 
-English: [README.md](README.md)
+![Stable Codex imagegen, delegated from your agent](assets/hero.jpg)
 
-## 這個 Skill 做什麼
+這個 skill 把圖片生成與編輯固定在 `@openai/codex@0.143.0`。你的 coding agent 載入 `$imagegen-0-143-0` 後，會把實際產圖工作委派給該固定 Codex 路徑，讓不同 session 的行為可重複。
 
-- 透過 `@openai/codex@0.143.0` 執行圖片生成。
-- 支援全新圖片生成、圖片編輯、參考圖導向生成。
-- 完整保留使用者的圖片 prompt。
-- 本機輸入圖片一律用絕對路徑傳入 `-i`。
-- 將存檔位置、輸入圖片對應等執行指令，和真正的圖片 prompt 分開。
+適用 **Codex**、**Claude Code**、**Grok**。
 
-## 為什麼要做這個 Skill
+## 安裝
 
-這個 repo 的主要原因，是我們在最新版 Codex 圖片生成路徑遇到以下網路錯誤：
+把 `skills/imagegen-0-143-0` 複製到各 agent 會載入的 skills 目錄：
 
-```text
-image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
-```
-
-這個錯誤是在最新版路徑遇到的，不是 `@openai/codex@0.143.0` 版本本身的錯誤。
-
-Codex 的圖片生成能力可能會因版本與執行介面不同而改變。對需要穩定輸出處理、prompt 保真、或相容既有圖片生成流程的團隊來說，直接依賴目前 session 的預設圖片工具不夠明確。
-
-這個 skill 的做法是：把圖片工作委派給一個子 Codex process，並固定使用 `@openai/codex@0.143.0`。
-
-主要目標：
-
-1. 使用者的 prompt 要原封不動傳入。
-2. 圖片輸入必須透過絕對路徑明確指定。
-3. 生成結果必須回傳清楚的輸出檔案路徑。
-4. 工作流程要能在使用 Codex skills 的 repo 之間移植。
-
-## Repo 結構
-
-```text
-.
-├── AGENTS.md
-├── README.md
-├── README-zh.md
-└── skills/
-    └── imagegen-0-143-0/
-        ├── SKILL.md
-        ├── agents/
-        │   └── openai.yaml
-        └── references/
-            └── usage.md
-```
-
-## 快速指南
-
-1. 將這個 repo 放在 Codex skill loader 可讀取的位置。
-2. 需要產圖或改圖時，請 Codex 使用 `imagegen-0-143-0`。
-3. 提供清楚的圖片 prompt。
-4. 如果要編輯圖片或使用參考圖，提供本機圖片路徑。
-5. 檢查子 Codex process 回傳的最終絕對輸出路徑。
-
-使用者請求範例：
-
-```text
-Use $imagegen-0-143-0 to generate a polished marketing image of Hong Kong Victoria Harbour at golden hour. Save it to ./generated.
-```
-
-## 手動執行指令
-
-這個 skill 內部使用的基本模式如下：
+| Agent | 個人（全專案） | 僅此專案 |
+| --- | --- | --- |
+| Codex | `~/.codex/skills/` | 你的 Codex loader 使用的 project skills 路徑 |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Grok | `~/.grok/skills/` 或 `~/.agents/skills/` | `.grok/skills/` |
 
 ```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  '$imagegen <verbatim user prompt>
-
-Execution instruction: Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
+# 在此 repo 根目錄執行
+cp -R skills/imagegen-0-143-0 ~/.claude/skills/imagegen-0-143-0   # Claude Code
+cp -R skills/imagegen-0-143-0 ~/.grok/skills/imagegen-0-143-0     # Grok
+cp -R skills/imagegen-0-143-0 ~/.agents/skills/imagegen-0-143-0   # 共用 / 多 agent
+cp -R skills/imagegen-0-143-0 ~/.codex/skills/imagegen-0-143-0    # Codex
 ```
 
-## 範例：生成新圖片
+**前置條件：** 已登入的 Codex / ChatGPT session，讓固定版 CLI 能執行 imagegen。
 
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  '$imagegen Generate a premium product launch hero image for a modern AI automation platform. Use a clean, professional composition with a real workspace, subtle screen glow, and clear room for website headline text.
+## 在 coding agent 裡使用
 
-Execution instruction: Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
+用一般對話下指令，並點名 skill。Agent 會載入 `$imagegen-0-143-0` 並執行固定版本流程。
 
-## 範例：編輯既有圖片
-
-每張輸入圖片使用一個 `-i` 參數。請一律使用絕對路徑。
-
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  -i /absolute/path/to/source.png \
-  '$imagegen Replace the background with a clean studio setting. Keep the product shape, label, proportions, and camera angle unchanged.
-
-Execution instruction: Image 1 is /absolute/path/to/source.png. Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
-
-## 範例：使用參考圖生成
-
-```bash
-npx --yes --package=@openai/codex@0.143.0 -- \
-  codex exec \
-  --skip-git-repo-check \
-  -m gpt-5.5 \
-  -c 'model_reasoning_effort="medium"' \
-  -i /absolute/path/to/style-reference.jpg \
-  -i /absolute/path/to/layout-reference.png \
-  '$imagegen Generate a new website hero image with a similar mood and composition. Do not copy the reference images directly.
-
-Execution instruction: Image 1 is /absolute/path/to/style-reference.jpg. Image 2 is /absolute/path/to/layout-reference.png. Save the final image to ./generated and output its absolute file path directly. No need to review and verify.'
-```
-
-## Prompt 規則
-
-核心規則是保留 prompt 原文。
-
-- 不要重寫使用者的圖片 prompt。
-- 除非使用者要求，不要翻譯 prompt。
-- 不要加入使用者沒有提供的風格細節或限制。
-- 除非使用者要求，不要修正文法或拼字。
-- 圖片檔案對應與存檔位置只放在 `Execution instruction:`。
-
-## 疑難排解
-
-最新版 Codex 圖片生成路徑的常見失敗情況之一，是圖片生成後端的網路請求失敗：
+### Codex
 
 ```text
-image generation failed: network error: error sending request for url (https://chatgpt.com/backend-api/codex/images/generations)
+Use $imagegen-0-143-0 to generate a polished marketing image of Hong Kong
+Victoria Harbour at golden hour. Save it to ./generated.
 ```
 
-這也是本 repo 固定使用 `@openai/codex@0.143.0` 來執行圖片生成的主要原因。如果仍然看到這個錯誤，請檢查網路連線、VPN 或 proxy 設定、防火牆規則，以及目前已登入的 Codex session 是否能存取 `chatgpt.com`。
+```text
+Use $imagegen-0-143-0 to edit /absolute/path/to/product.png: replace the
+background with a clean studio setting. Keep product shape and camera angle.
+Save to ./generated.
+```
 
-## 開發備註
+### Claude Code
 
-這個 repo 目前沒有 build step。修改文件後，請檢查 Markdown，並確認指令範例仍然使用：
+安裝到 `~/.claude/skills/` 或 `.claude/skills/` 後：
 
-- `npx --yes --package=@openai/codex@0.143.0`
-- `codex exec --skip-git-repo-check`
-- 對輸入圖片重複使用 `-i /absolute/path`
-- 獨立的 `Execution instruction:` 行
+```text
+Use the imagegen-0-143-0 skill to generate a premium product launch hero image
+for a modern AI automation platform. Clean professional workspace, subtle screen
+glow, room for a website headline. Save to ./generated.
+```
 
-## License
+```text
+$imagegen-0-143-0 — edit ./assets/product.png, studio background, keep the
+product unchanged. Save to ./generated.
+```
 
-目前尚未包含 license file。發布或散佈此 repo 前，請先補上 license。
+### Grok
+
+安裝到 `~/.grok/skills/`、`~/.agents/skills/`，或專案 `.grok/skills/`。用 `$imagegen-0-143-0`，或從 `/skills` 選取：
+
+```text
+Use $imagegen-0-143-0 to generate a website hero. Style reference:
+./refs/style.jpg. Layout reference: ./refs/layout.png. Same mood and composition,
+do not copy the references. Save to ./generated.
+```
+
+```text
+$imagegen-0-143-0 generate a photorealistic desk setup for a SaaS landing page,
+soft morning light. Save absolute path when done.
+```
+
+## Prompt 模式
+
+三個 agent 可用相同寫法。本機圖片建議用絕對路徑。
+
+**生成**
+```text
+Use $imagegen-0-143-0 to generate <你的圖片 prompt>。Save it to ./generated.
+```
+
+**編輯**
+```text
+Use $imagegen-0-143-0 to edit /absolute/path/to/source.png: <編輯說明>。
+Save to ./generated.
+```
+
+**參考圖導向**
+```text
+Use $imagegen-0-143-0 with /absolute/path/to/style.jpg and
+/absolute/path/to/layout.png as references. Generate <你的圖片 prompt>。
+Do not copy the references. Save to ./generated.
+```
+
+## 規則
+
+- 除非使用者要求，不要重寫、翻譯或「優化」圖片 prompt
+- 檔案對應與存檔路徑放在執行指令，不要寫進圖片 prompt
+- 未指定時預設存到 `./generated`
+- 回報最終絕對輸出路徑
+
+## 為什麼固定 0.143.0
+
+最新版 Codex 圖片路徑可能出現：
+
+```text
+image generation failed: network error: error sending request for url
+(https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+此 skill 會把圖片工作委派給固定 `@openai/codex@0.143.0` 的子行程：prompt 原封不動、輸入用絕對路徑 `-i`、輸出路徑明確。
+
+若仍出現該網路錯誤，請檢查連線、VPN／proxy、防火牆，以及已登入的 Codex session 是否能存取 `chatgpt.com`。
+
+Skill 作者用的內部 CLI 細節：[skills/imagegen-0-143-0/references/usage.md](skills/imagegen-0-143-0/references/usage.md)
