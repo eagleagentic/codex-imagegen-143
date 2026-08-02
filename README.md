@@ -15,6 +15,19 @@ This skill pins image generation and editing to `@openai/codex@0.143.0`. Your co
 
 Works with **Codex**, **Claude Code**, and **Grok**.
 
+## Why pin to 0.143.0
+
+Latest Codex image paths can fail with:
+
+```text
+image generation failed: network error: error sending request for url
+(https://chatgpt.com/backend-api/codex/images/generations)
+```
+
+This skill delegates image work to a child process pinned to `@openai/codex@0.143.0` so prompts stay verbatim, inputs use absolute `-i` paths, and the output path is always explicit.
+
+If you still see that network error, check connectivity, VPN/proxy, firewall, and that the authenticated Codex session can reach `chatgpt.com`.
+
 ## Install
 
 Copy `skills/imagegen-0-143-0` into the skills directory your agent loads:
@@ -110,18 +123,5 @@ Do not copy the references. Save to ./generated.
 - File mapping and save path belong in execution instructions, not the image prompt
 - Default save directory: `./generated` when the user does not specify one
 - Report the final absolute output path
-
-## Why pin to 0.143.0
-
-Latest Codex image paths can fail with:
-
-```text
-image generation failed: network error: error sending request for url
-(https://chatgpt.com/backend-api/codex/images/generations)
-```
-
-This skill delegates image work to a child process pinned to `@openai/codex@0.143.0` so prompts stay verbatim, inputs use absolute `-i` paths, and the output path is always explicit.
-
-If you still see that network error, check connectivity, VPN/proxy, firewall, and that the authenticated Codex session can reach `chatgpt.com`.
 
 Internal CLI details (for skill authors): [skills/imagegen-0-143-0/references/usage.md](skills/imagegen-0-143-0/references/usage.md)
